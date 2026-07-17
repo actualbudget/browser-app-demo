@@ -38,9 +38,6 @@ jobs:
         run: yarn install --immutable
 
       - name: Build
-        # base must match the project-site subpath so asset URLs resolve.
-        env:
-          BASE_PATH: /browser-app-demo/
         run: yarn build
 
       - name: Upload Pages artifact

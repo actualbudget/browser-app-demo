@@ -1134,7 +1134,7 @@ __metadata:
     vitest: "npm:^3"
   dependenciesMeta:
     better-sqlite3:
-      built: true
+      built: false
   languageName: unknown
   linkType: soft
 
