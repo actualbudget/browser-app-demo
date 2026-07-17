@@ -1,0 +1,200 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Palette: OKLCH, neutrals tinted toward the brand hue (~295). Dark theme:
+ * scene = reviewing personal finances at a desk in the evening, focused and
+ * calm. Purple is used deliberately as the single identity accent + the data
+ * series ramp, not smeared across every surface.
+ */
+:root {
+  color-scheme: dark;
+
+  --bg: oklch(16% 0.012 295);
+  --bg-2: oklch(19% 0.014 295);
+  --surface: oklch(22% 0.015 295);
+  --surface-2: oklch(26% 0.018 295);
+  --line: oklch(34% 0.02 295 / 0.6);
+  --line-strong: oklch(42% 0.03 295 / 0.7);
+
+  --text: oklch(95% 0.01 295);
+  --text-dim: oklch(72% 0.02 295);
+  --text-faint: oklch(58% 0.02 295);
+
+  --brand: oklch(62% 0.2 295);
+  --brand-bright: oklch(70% 0.19 290);
+  --brand-deep: oklch(48% 0.18 296);
+
+  --pos: oklch(72% 0.16 155);
+  --neg: oklch(66% 0.2 25);
+  --warn: oklch(78% 0.15 75);
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11', 'ss01';
+  background-image:
+    radial-gradient(900px 520px at 88% -8%, oklch(62% 0.2 295 / 0.16), transparent 62%),
+    radial-gradient(700px 460px at -5% 4%, oklch(55% 0.17 280 / 0.1), transparent 60%);
+  background-attachment: fixed;
+}
+
+@layer components {
+  .panel {
+    background-color: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 1rem;
+  }
+  .panel-2 {
+    background-color: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: 0.75rem;
+  }
+  .label {
+    @apply text-[11px] font-semibold uppercase tracking-[0.12em];
+    color: var(--text-faint);
+  }
+  .num {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-feature-settings: 'tnum', 'zero';
+  }
+  .input {
+    width: 100%;
+    border-radius: 0.7rem;
+    border: 1px solid var(--line-strong);
+    background-color: var(--bg-2);
+    padding: 0.65rem 0.85rem;
+    font-size: 0.875rem;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.18s, box-shadow 0.18s;
+  }
+  .input::placeholder {
+    color: var(--text-faint);
+  }
+  .input:focus {
+    border-color: var(--brand);
+    box-shadow: 0 0 0 3px oklch(62% 0.2 295 / 0.18);
+  }
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-[0.7rem] px-4 py-2.5 text-sm font-semibold;
+    color: white;
+    background: linear-gradient(180deg, var(--brand-bright), var(--brand-deep));
+    box-shadow: 0 6px 22px -10px oklch(62% 0.2 295 / 0.9);
+    transition: transform 0.12s cubic-bezier(0.22, 1, 0.36, 1), filter 0.18s;
+  }
+  .btn-primary:hover {
+    filter: brightness(1.08);
+  }
+  .btn-primary:active {
+    transform: scale(0.985);
+  }
+  .btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-[0.7rem] px-3.5 py-2 text-sm font-medium;
+    color: var(--text-dim);
+    border: 1px solid var(--line-strong);
+    background-color: oklch(26% 0.018 295 / 0.4);
+    transition: color 0.18s, border-color 0.18s;
+  }
+  .btn-ghost:hover {
+    color: var(--text);
+    border-color: var(--brand);
+  }
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium;
+    border: 1px solid var(--line);
+    color: var(--text-dim);
+  }
+}
+
+/* Recharts theming */
+.recharts-cartesian-axis-tick text {
+  fill: oklch(58% 0.02 295);
+  font-size: 11px;
+}
+.recharts-cartesian-grid line {
+  stroke: oklch(42% 0.02 295 / 0.18);
+}
+.recharts-curve.recharts-tooltip-cursor {
+  stroke: oklch(62% 0.2 295 / 0.4);
+}
+.recharts-tooltip-wrapper:focus {
+  outline: none;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: oklch(62% 0.2 295 / 0.3);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: oklch(62% 0.2 295 / 0.5);
+  background-clip: content-box;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.rise {
+  animation: rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Range sliders */
+.aa-range {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--line);
+  outline: none;
+}
+.aa-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, var(--brand-bright), var(--brand-deep));
+  border: 2px solid var(--bg-2);
+  box-shadow: 0 2px 8px -2px oklch(62% 0.2 295 / 0.8);
+  cursor: pointer;
+  transition: transform 0.12s;
+}
+.aa-range::-webkit-slider-thumb:hover {
+  transform: scale(1.12);
+}
+.aa-range::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--brand);
+  border: 2px solid var(--bg-2);
+  cursor: pointer;
+}

@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Actual · Financial Analysis</title>
+    <!--
+      The app needs the page to be cross-origin isolated (COOP/COEP) so the
+      WASM SQLite engine can use SharedArrayBuffer. GitHub Pages can't set
+      response headers, so this tiny service worker re-serves the page with
+      them and reloads once on first visit. It no-ops where the headers are
+      already present (e.g. the Vite dev/preview server), so local dev is
+      unaffected. Must load before the app's module script below.
+    -->
+    <script src="%BASE_URL%coi-serviceworker.js"></script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

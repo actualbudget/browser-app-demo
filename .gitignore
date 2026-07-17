@@ -1,0 +1,16 @@
+node_modules/
+dist/
+.actual-data/
+*.local
+.DS_Store
+.env
+
+# Yarn (Corepack-managed, node-modules linker)
+.yarn/*
+!.yarn/patches
+.pnp.*
+
+# Planning/spec docs (local only)
+docs/
+
+.playwright-cli/
