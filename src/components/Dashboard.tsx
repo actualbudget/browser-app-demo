@@ -24,11 +24,11 @@ export function Dashboard({ onDisconnect }: { onDisconnect: () => void }) {
   const [settings, setSettings] = useState<SettingsType>(() => loadSettings());
   const [showSettings, setShowSettings] = useState(false);
 
-  // The transaction scans only depend on account classification, so tweaking
-  // assumptions in Settings re-runs just the cheap FIRE arithmetic.
+  // The transaction scans only depend on account classification and excluded
+  // categories, so tweaking assumptions in Settings re-runs just the cheap FIRE arithmetic.
   const base = useMemo(
-    () => (snapshot ? deriveBase(snapshot, settings.accountClasses) : null),
-    [snapshot, settings.accountClasses],
+    () => (snapshot ? deriveBase(snapshot, settings.accountClasses, settings.excludedCategories) : null),
+    [snapshot, settings.accountClasses, settings.excludedCategories],
   );
   const d = useMemo(
     () => (base ? deriveFinance(base, settings.assumptions) : null),

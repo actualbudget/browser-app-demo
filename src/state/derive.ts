@@ -36,13 +36,17 @@ export type Derived = ReturnType<typeof deriveFinance>;
  * expensive part (full transaction scans), so it's separated from the cheap
  * assumption arithmetic and memoized independently in the Dashboard.
  */
-export function deriveBase(snapshot: Snapshot, classes: Record<string, AccountClass>) {
+export function deriveBase(
+  snapshot: Snapshot,
+  classes: Record<string, AccountClass>,
+  excludedCategories: string[] = [],
+) {
   // Spending/income flows through cash-classified accounts only, so changing an
   // account's class (cash / investment / excluded) live-updates these analyses.
   const cashAccounts = new Set(
     snapshot.accounts.filter((acc) => resolveClass(acc, classes) === 'cash').map((acc) => acc.id),
   );
-  const idx = buildIndexes(snapshot, cashAccounts);
+  const idx = buildIndexes(snapshot, cashAccounts, new Set(excludedCategories));
 
   const months = monthlyCashflow(snapshot, idx);
   const totals = monthlyTotals(snapshot, idx);
@@ -121,5 +125,8 @@ export function deriveFinance(base: DerivedBase, a: Assumptions) {
 
 /** Run every analysis once for the current snapshot + settings. */
 export function derive(snapshot: Snapshot, settings: Settings): Derived {
-  return deriveFinance(deriveBase(snapshot, settings.accountClasses), settings.assumptions);
+  return deriveFinance(
+    deriveBase(snapshot, settings.accountClasses, settings.excludedCategories),
+    settings.assumptions,
+  );
 }

@@ -12,6 +12,7 @@ export interface Assumptions {
 
 export interface Settings {
   accountClasses: Record<string, AccountClass>; // accountId -> class override
+  excludedCategories: string[]; // category ids dropped from all spending analysis
   assumptions: Assumptions;
 }
 

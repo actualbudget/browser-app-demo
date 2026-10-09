@@ -24,6 +24,26 @@ export function Settings({ snapshot, settings, trailing12, onChange, onClose }: 
     onChange({ ...settings, accountClasses: { ...settings.accountClasses, [id]: value } });
   const setAssumption = (patch: Partial<typeof a>) =>
     onChange({ ...settings, assumptions: { ...a, ...patch } });
+  const excluded = new Set(settings.excludedCategories);
+  const [catQuery, setCatQuery] = useState('');
+  const toggleCategory = (id: string) => {
+    const next = new Set(excluded);
+    next.has(id) ? next.delete(id) : next.add(id);
+    onChange({ ...settings, excludedCategories: [...next] });
+  };
+  const catById = new Map(snapshot.categories.map((c) => [c.id, c]));
+  const q = catQuery.trim().toLowerCase();
+  // Expense categories grouped under their group; a search query narrows rows
+  // and auto-expands groups so large budgets stay navigable.
+  const expenseGroups = snapshot.categoryGroups
+    .filter((g) => !g.is_income)
+    .map((g) => ({
+      ...g,
+      categories: snapshot.categories.filter(
+        (c) => c.group_id === g.id && !c.is_income && (!q || c.name.toLowerCase().includes(q)),
+      ),
+    }))
+    .filter((g) => g.categories.length > 0);
 
   const pct = (v: number) => Math.round(v * 1000) / 10;
   const useActualSpend = a.targetAnnualSpend == null;
@@ -100,6 +120,71 @@ export function Settings({ snapshot, settings, trailing12, onChange, onClose }: 
               {showClosed && <div className="mt-2 space-y-2">{closedAccounts.map(renderAccount)}</div>}
             </div>
           )}
+        </section>
+
+        <section className="mb-8">
+          <h3 className="label mb-1">Excluded categories</h3>
+          <p className="mb-3 text-[11px] text-[var(--text-faint)]">
+            Left out of spending, burn rate and FIRE math. Useful for costs you know will disappear.
+          </p>
+
+          {excluded.size > 0 && (
+            <div className="mb-3 flex flex-wrap gap-1.5">
+              {[...excluded].map((id) => (
+                <button key={id} className="chip transition hover:border-[var(--neg)] hover:text-[var(--text)]" onClick={() => toggleCategory(id)}>
+                  {catById.get(id)?.name ?? id}
+                  <span aria-hidden className="text-[var(--text-faint)]">✕</span>
+                </button>
+              ))}
+            </div>
+          )}
+
+          <input
+            className="input mb-2"
+            style={{ padding: '0.5rem 0.75rem' }}
+            placeholder="Search categories…"
+            value={catQuery}
+            onChange={(e) => setCatQuery(e.target.value)}
+          />
+
+          <div className="panel-2 divide-y divide-[var(--line)] overflow-hidden">
+            {expenseGroups.length === 0 && (
+              <p className="p-3 text-xs text-[var(--text-faint)]">No categories match.</p>
+            )}
+            {expenseGroups.map((g) => {
+              const n = g.categories.filter((c) => excluded.has(c.id)).length;
+              return (
+                <details key={g.id} open={q !== '' || undefined} className="group">
+                  <summary className="flex cursor-pointer select-none items-center justify-between gap-2 px-3 py-2 text-sm text-[var(--text)]">
+                    <span className="flex items-center gap-2">
+                      <span className="text-[10px] text-[var(--text-faint)] transition group-open:rotate-90">▶</span>
+                      {g.name}
+                    </span>
+                    <span className="num text-[11px] text-[var(--text-faint)]">
+                      {n > 0 ? `${n} excluded` : `${g.categories.length}`}
+                    </span>
+                  </summary>
+                  <div className="pb-1">
+                    {g.categories.map((c) => {
+                      const off = excluded.has(c.id);
+                      return (
+                        <button
+                          key={c.id}
+                          onClick={() => toggleCategory(c.id)}
+                          className="flex w-full items-center justify-between gap-3 px-3 py-1.5 text-left text-sm transition hover:bg-[var(--surface)]"
+                          style={{ color: off ? 'var(--text-faint)' : 'var(--text)' }}
+                          aria-pressed={off}
+                        >
+                          <span className="truncate pl-5">{c.name}</span>
+                          <Switch on={!off} />
+                        </button>
+                      );
+                    })}
+                  </div>
+                </details>
+              );
+            })}
+          </div>
         </section>
 
         <section className="space-y-5">
@@ -204,5 +289,21 @@ function NumberRow({
       </div>
       {hint && <p className="mt-1 text-[11px] text-[var(--text-faint)]">{hint}</p>}
     </div>
+  );
+}
+
+/** Tiny presentational toggle; the parent button owns the click and aria state. */
+function Switch({ on }: { on: boolean }) {
+  return (
+    <span
+      aria-hidden
+      className="relative inline-block h-4 w-7 shrink-0 rounded-full transition"
+      style={{ background: on ? 'var(--brand)' : 'var(--line-strong)' }}
+    >
+      <span
+        className="absolute top-0.5 h-3 w-3 rounded-full bg-white transition"
+        style={{ left: on ? 'calc(100% - 0.875rem)' : '0.125rem' }}
+      />
+    </span>
   );
 }

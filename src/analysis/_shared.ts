@@ -6,6 +6,8 @@ export interface Indexes {
   transferPayees: Set<string>;
   /** Accounts whose transactions count as real spending/income. */
   spendingAccounts: Set<string>;
+  /** Category ids the user chose to leave out of spending analysis. */
+  excludedCategories: Set<string>;
 }
 
 /**
@@ -13,7 +15,11 @@ export interface Indexes {
  * which accounts count as spending/income; when omitted, defaults to all
  * on-budget accounts (Actual's own spending-report behaviour).
  */
-export function buildIndexes(snap: Snapshot, spendingAccountIds?: Set<string>): Indexes {
+export function buildIndexes(
+  snap: Snapshot,
+  spendingAccountIds?: Set<string>,
+  excludedCategories: Set<string> = new Set(),
+): Indexes {
   const categoryById = new Map(snap.categories.map((c) => [c.id, c]));
   const payeeById = new Map(snap.payees.map((p) => [p.id, p]));
   const transferPayees = new Set(
@@ -22,7 +28,7 @@ export function buildIndexes(snap: Snapshot, spendingAccountIds?: Set<string>): 
   const spendingAccounts =
     spendingAccountIds ??
     new Set(snap.accounts.filter((a) => !a.offbudget).map((a) => a.id));
-  return { categoryById, payeeById, transferPayees, spendingAccounts };
+  return { categoryById, payeeById, transferPayees, spendingAccounts, excludedCategories };
 }
 
 /** A transfer leg: moves money between own accounts, not real income/expense. */
@@ -40,10 +46,15 @@ export function isTransfer(tx: TransactionDTO, idx: Indexes): boolean {
  *    no categories and represent asset changes, not spending; counting them
  *    would dump everything into "Uncategorized"). Net worth still includes
  *    these via account classification.
+ *  - user-excluded categories (settings), e.g. a cost known to disappear.
  */
 export function realTransactions(snap: Snapshot, idx: Indexes): TransactionDTO[] {
   return snap.transactions.filter(
-    (tx) => !tx.is_parent && !isTransfer(tx, idx) && idx.spendingAccounts.has(tx.account),
+    (tx) =>
+      !tx.is_parent &&
+      !isTransfer(tx, idx) &&
+      idx.spendingAccounts.has(tx.account) &&
+      !(tx.category != null && idx.excludedCategories.has(tx.category)),
   );
 }
 

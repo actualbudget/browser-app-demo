@@ -8,6 +8,7 @@ import {
   anomalies,
   seasonality,
 } from './spending';
+import { buildIndexes } from './_shared';
 import type { Snapshot, TransactionDTO } from '../types';
 
 const base: Omit<Snapshot, 'transactions'> = {
@@ -44,6 +45,15 @@ const tx = (p: Partial<TransactionDTO>): TransactionDTO => ({
 const snap = (transactions: TransactionDTO[]): Snapshot => ({ ...base, transactions });
 
 describe('spending', () => {
+  it('drops excluded categories from category spending', () => {
+    const s = snap([
+      tx({ amount: -3000, category: 'food' }),
+      tx({ amount: -9000, category: 'rent' }),
+    ]);
+    const cats = byCategory(s, buildIndexes(s, undefined, new Set(['rent'])));
+    expect(cats.map((c) => c.name)).toEqual(['Food']);
+  });
+
   it('aggregates and sorts by category, ignoring income', () => {
     const s = snap([
       tx({ amount: -3000, category: 'food' }),

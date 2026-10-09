@@ -5,6 +5,7 @@ const KEY = 'aa.settings.v1';
 
 interface StoredSettings {
   accountClasses?: Record<string, AccountClass>;
+  excludedCategories?: string[];
   assumptions?: Partial<Assumptions>;
 }
 
@@ -24,6 +25,7 @@ export function loadSettings(): Settings {
 
   return {
     accountClasses: stored.accountClasses ?? {},
+    excludedCategories: stored.excludedCategories ?? [],
     assumptions: { ...DEFAULT_ASSUMPTIONS, ...(stored.assumptions ?? {}) },
   };
 }
