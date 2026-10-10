@@ -37,5 +37,8 @@
     "better-sqlite3": {
       "built": false
     }
+  },
+  "resolutions": {
+    "postcss-selector-parser": "^7.1.6"
   }
 }
